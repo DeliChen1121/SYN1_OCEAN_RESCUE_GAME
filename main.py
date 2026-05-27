@@ -6,7 +6,7 @@ import asyncio
 
 # Initialize Pygame and mixer
 pygame.init()
-pygame.mixer.init()
+pygame.mixer.init(44100, -16, 2, 2048)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # Screen setup
