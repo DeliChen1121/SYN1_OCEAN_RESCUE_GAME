@@ -37,4 +37,4 @@ This project was made possible by the following free and open-source assets:
 5. **End (Time's Up):** [davidbain - end](https://freesound.org/people/davidbain/sounds/135831/)
 
 ---
-*"Our oceans are drowning in plastic while marine life is relentlessly exploited. Every choice has a consequence. Clean the water, protect the life."*
+*"Our oceans are drowning in plastic while marine life is relentlessly exploited. Every choice has a consequence. Clean the water, protect the life."* 
