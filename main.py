@@ -728,7 +728,7 @@ async def main():
                 hint_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 150)),
             )
             
-            # 专属署名移至右上角
+            # Move custom signature to the top-right corner
             sig_text = info_font.render("Made by Deli Chen", True, WHITE)
             screen.blit(sig_text, (WIDTH - sig_text.get_width() - 20, 20))
 
