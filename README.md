@@ -11,7 +11,20 @@ This interactive artifact serves to illustrate the tangible consequences of huma
 * **Negative Consequence (Harming Wildlife):** Accidentally hooking marine life (turtles, fish, jellyfish, starfish) deducts points and triggers visual/audio alarms.
 * **Dynamic Environment:** The game features a real-time visual feedback loop. As your score increases, the background water color dynamically shifts from a toxic, murky brown to a vibrant, clean blue, directly reflecting the impact of your choices.
 
-## 🚀 How to Run
+## 🚀 How to Play
+
+**The easiest way to experience the project is directly in your web browser (No installation required!):**
+
+👉 **[Play Ocean Rescue Online Here](https://delichen1121.github.io/SYN1_OCEAN_RESCUE_GAME/)**
+
+*(Recommended browsers: Chrome or Edge. For the best audio experience, ensure your volume is up. If the game does not load immediately, please refresh the page.
+Note: The BGM may be a bit harsh because it has been compressed by web pages. If you want an uncompressed version, please follow the instructions below to install pygame : )*
+
+---
+
+### 🛠️ For Developers (Run Locally)
+If you wish to view the source code or run the Python script locally on your machine:
+
 1. Ensure you have Python installed.
 2. Install the Pygame library:
    ```bash
