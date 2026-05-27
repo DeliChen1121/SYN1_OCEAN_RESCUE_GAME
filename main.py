@@ -38,7 +38,7 @@ info_font = pygame.font.SysFont("Arial", 20, bold=False)
 title_font = pygame.font.SysFont("Arial", 70, bold=True) 
 
 # ================= Load audio =================
-bgm_path = os.path.join(BASE_DIR, "resources", "bgm.mp3")
+bgm_path = os.path.join(BASE_DIR, "resources", "bgm.ogg")
 
 def load_sound(filename):
     path = os.path.join(BASE_DIR, "resources", filename)
@@ -47,7 +47,7 @@ def load_sound(filename):
 snd_catch = load_sound("click.wav")              
 snd_success = load_sound("chime.wav")            
 snd_fail = load_sound("error.wav")               
-snd_countdown = load_sound("five_sec_countdown.mp3") 
+snd_countdown = load_sound("five_sec_countdown.ogg") 
 snd_end = load_sound("end.wav")                  
 
 def play_sound(snd):
