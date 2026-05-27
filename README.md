@@ -16,3 +16,25 @@ This interactive artifact serves to illustrate the tangible consequences of huma
 2. Install the Pygame library:
    ```bash
    pip install pygame
+
+## 🧑‍💻 Developer
+* **Made by:** Deli Chen
+
+## 🔗 Credits & Asset Sources
+This project was made possible by the following free and open-source assets:
+
+**Images & Sprites:**
+* 2D Icons & Assets via [Flaticon](https://www.flaticon.com)
+
+**Audio (BGM):**
+* Background Music: [Piano Ocean Ballad](https://pixabay.com/music/modern-classical-piano-ocean-ballad-297727/) via Pixabay
+
+**Sound Effects (Juice via Freesound.org):**
+1. **Click (Hooked):** [Mellau - click](https://freesound.org/people/Mellau/sounds/506054/)
+2. **Chime (Score):** [Andromadax24 - chime](https://freesound.org/people/Andromadax24/sounds/186719/)
+3. **Error (Penalty):** [qubodup - error](https://freesound.org/people/qubodup/sounds/722377/)
+4. **Countdown (5-sec):** [angelTSX - 5-sec-countdown](https://freesound.org/people/angelTSX/sounds/851299/)
+5. **End (Time's Up):** [davidbain - end](https://freesound.org/people/davidbain/sounds/135831/)
+
+---
+*"Our oceans are drowning in plastic while marine life is relentlessly exploited. Every choice has a consequence. Clean the water, protect the life."*
