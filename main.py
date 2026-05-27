@@ -2,6 +2,7 @@ import pygame
 import math
 import random
 import os
+import asyncio
 
 # Initialize Pygame and mixer
 pygame.init()
@@ -334,7 +335,7 @@ def draw_tutorial_icon(surface, item_name, center):
             pygame.draw.circle(surface, cfg["color"], center, size // 2)
 
 # ================= Main loop =================
-def main():
+async def main():
     hook = Hook()
     items = []
     floating_texts = []
@@ -873,8 +874,9 @@ def main():
 
         pygame.display.flip()
         clock.tick(60)
+        await asyncio.sleep(0)
 
     pygame.quit()
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
