@@ -35,6 +35,7 @@ huge_font = pygame.font.SysFont("Arial", 100, bold=True)
 stat_font = pygame.font.SysFont("Arial", 36, bold=True) 
 tutorial_font = pygame.font.SysFont("Arial", 30, bold=True)
 info_font = pygame.font.SysFont("Arial", 20, bold=False) 
+small_info_font = pygame.font.SysFont("Arial", 18, bold=False)
 title_font = pygame.font.SysFont("Arial", 70, bold=True) 
 
 # ================= Load audio =================
@@ -411,7 +412,7 @@ async def main():
     start_ticks = 0
     
     # Button collision rect definitions
-    start_button_rect = pygame.Rect(WIDTH//2 - 120, HEIGHT//2 + 70, 240, 60)
+    start_button_rect = pygame.Rect(WIDTH//2 - 120, HEIGHT//2 + 120, 240, 60)
     replay_button_rect = pygame.Rect(WIDTH//2 - 100, 480, 200, 50)
     
     countdown_sound_played = False
@@ -648,41 +649,53 @@ async def main():
                 tut_heading.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 90)),
             )
 
-            draw_tutorial_icon(
-                screen,
-                "bag",
-                (WIDTH // 2 - 260, HEIGHT // 2 - 20),
-            )
-            trash_text = info_font.render(
-                "Catch trash to clean the ocean",
-                True,
-                SCORE_GREEN,
-            )
-            screen.blit(trash_text, (WIDTH // 2 - 220, HEIGHT // 2 - 40))
-            score_text = info_font.render(
-                "+ Points for trash items",
-                True,
-                SCORE_GREEN,
-            )
-            screen.blit(score_text, (WIDTH // 2 - 220, HEIGHT // 2 - 15))
+            bag_x = WIDTH // 2 - 160
+            bag_y = HEIGHT // 2 - 40
+            icon_size = ITEM_CONFIG["bag"]["size"]
+            rule_width = 380
+            rule_height = icon_size
 
             draw_tutorial_icon(
                 screen,
+                "bag",
+                (bag_x, bag_y),
+            )
+            trash_rule = small_info_font.render(
+                "Catch trash to clean the ocean (+ Points)",
+                True,
+                SCORE_GREEN,
+            )
+            trash_rule_box = pygame.Surface((rule_width, rule_height), pygame.SRCALPHA)
+            trash_rule_box.blit(
+                trash_rule,
+                trash_rule.get_rect(midleft=(4, rule_height // 2)),
+            )
+            screen.blit(
+                trash_rule_box,
+                (bag_x + icon_size // 2 + 10, bag_y - rule_height // 2),
+            )
+
+            fish_x = bag_x
+            fish_y = bag_y + icon_size + 20
+            draw_tutorial_icon(
+                screen,
                 "fish",
-                (WIDTH // 2 + 50, HEIGHT // 2 - 20),
+                (fish_x, fish_y),
             )
-            animal_text = info_font.render(
-                "Avoid animals to stay safe",
+            fish_rule = small_info_font.render(
+                "Avoid animals to stay safe (- Points)",
                 True,
                 SCORE_RED,
             )
-            screen.blit(animal_text, (WIDTH // 2 + 80, HEIGHT // 2 - 40))
-            penalty_text = info_font.render(
-                "- Points for animals",
-                True,
-                SCORE_RED,
+            fish_rule_box = pygame.Surface((rule_width, rule_height), pygame.SRCALPHA)
+            fish_rule_box.blit(
+                fish_rule,
+                fish_rule.get_rect(midleft=(4, rule_height // 2)),
             )
-            screen.blit(penalty_text, (WIDTH // 2 + 80, HEIGHT // 2 - 15))
+            screen.blit(
+                fish_rule_box,
+                (fish_x + icon_size // 2 + 10, fish_y - rule_height // 2),
+            )
 
             hint_text = info_font.render(
                 "Use SPACE or click START when ready",
@@ -691,9 +704,8 @@ async def main():
             )
             screen.blit(
                 hint_text,
-                hint_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 40)),
+                hint_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 100)),
             )
-            # ----------------------------------------------------------
 
             # Start Button
             color = (
@@ -715,17 +727,6 @@ async def main():
             screen.blit(
                 btn_text,
                 btn_text.get_rect(center=start_button_rect.center),
-            )
-            
-            # Hint Text
-            hint_text = info_font.render(
-                "Or press SPACE to begin",
-                True,
-                WHITE,
-            )
-            screen.blit(
-                hint_text,
-                hint_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 150)),
             )
             
             # Move custom signature to the top-right corner
