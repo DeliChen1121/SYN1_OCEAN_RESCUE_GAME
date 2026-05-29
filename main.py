@@ -24,10 +24,8 @@ HOOK_GRAY = (180, 180, 180)
 WHITE = (255, 255, 255)
 WARNING_RED = (200, 0, 0)
 SCORE_GREEN = (50, 220, 50) 
-SCORE_BLUE = (100, 200, 255) # New color for saved animals
+SCORE_BLUE = (100, 200, 255) 
 SCORE_RED = (255, 50, 50)   
-BTN_COLOR = (40, 120, 180)
-BTN_HOVER = (60, 150, 220)
 
 # Font setup
 font = pygame.font.SysFont("Arial", 24, bold=True)
@@ -35,8 +33,8 @@ float_font = pygame.font.SysFont("Arial", 32, bold=True)
 huge_font = pygame.font.SysFont("Arial", 100, bold=True) 
 stat_font = pygame.font.SysFont("Arial", 36, bold=True) 
 tutorial_font = pygame.font.SysFont("Arial", 30, bold=True)
-info_font = pygame.font.SysFont("Arial", 20, bold=False) 
-small_info_font = pygame.font.SysFont("Arial", 18, bold=False)
+info_font = pygame.font.SysFont("Arial", 24, bold=False) # Slightly bigger for kids
+small_info_font = pygame.font.SysFont("Arial", 20, bold=False)
 title_font = pygame.font.SysFont("Arial", 70, bold=True) 
 
 # ================= Load audio =================
@@ -62,62 +60,14 @@ def play_sound(snd):
 
 # ================= Item configuration dictionary =================
 ITEM_CONFIG = {
-    "banana": {
-        "category": "trash",
-        "score": 20,
-        "img": "resources/banana.png",
-        "size": 45,
-        "color": (255, 255, 0),
-    },
-    "bag": {
-        "category": "trash",
-        "score": 30,
-        "img": "resources/bag.png",
-        "size": 45,
-        "color": (150, 150, 150),
-    },
-    "can": {
-        "category": "trash",
-        "score": 40,
-        "img": "resources/can.png",
-        "size": 45,
-        "color": (200, 200, 200),
-    },
-    "waste": {
-        "category": "trash",
-        "score": 50,
-        "img": "resources/waste.png",
-        "size": 45,
-        "color": (150, 0, 200),
-    },
-    "starfish": {
-        "category": "animal",
-        "score": -10,
-        "img": "resources/starfish.png",
-        "size": 45,
-        "color": (255, 165, 0),
-    },
-    "jellyfish": {
-        "category": "animal",
-        "score": -20,
-        "img": "resources/jellyfish.png",
-        "size": 45,
-        "color": (255, 150, 200),
-    },
-    "fish": {
-        "category": "animal",
-        "score": -30,
-        "img": "resources/fish.png",
-        "size": 45,
-        "color": (50, 200, 80),
-    },
-    "turtle": {
-        "category": "animal",
-        "score": -40,
-        "img": "resources/turtle.png",
-        "size": 45,
-        "color": (0, 150, 0),
-    },
+    "banana": {"category": "trash", "score": 20, "img": "resources/banana.png", "size": 45, "color": (255, 255, 0)},
+    "bag": {"category": "trash", "score": 30, "img": "resources/bag.png", "size": 45, "color": (150, 150, 150)},
+    "can": {"category": "trash", "score": 40, "img": "resources/can.png", "size": 45, "color": (200, 200, 200)},
+    "waste": {"category": "trash", "score": 50, "img": "resources/waste.png", "size": 45, "color": (150, 0, 200)},
+    "starfish": {"category": "animal", "score": -10, "img": "resources/starfish.png", "size": 45, "color": (255, 165, 0)},
+    "jellyfish": {"category": "animal", "score": -20, "img": "resources/jellyfish.png", "size": 45, "color": (255, 150, 200)},
+    "fish": {"category": "animal", "score": -30, "img": "resources/fish.png", "size": 45, "color": (50, 200, 80)},
+    "turtle": {"category": "animal", "score": -40, "img": "resources/turtle.png", "size": 45, "color": (0, 150, 0)},
 }
 
 def get_dynamic_bg_color(score):
@@ -156,11 +106,7 @@ class Bubble:
 
     def draw(self, surface):
         pygame.draw.circle(
-            surface,
-            WHITE,
-            (int(self.x), int(self.y)),
-            self.radius,
-            1,
+            surface, WHITE, (int(self.x), int(self.y)), self.radius, 1
         )
 
 class FloatingText:
@@ -229,51 +175,37 @@ class Hook:
         ex, ey = self.get_end_pos()
         
         # 1. Draw the rope
-        pygame.draw.line(
-            surface,
-            HOOK_GRAY,
-            (self.x, self.y),
-            (ex, ey),
-            3,
-        )
+        pygame.draw.line(surface, HOOK_GRAY, (self.x, self.y), (ex, ey), 3)
         
         # 2. Draw inverted U-shaped hook using trigonometry
         rad = math.radians(self.angle)
-        dx = math.sin(rad)  # Downward vector
+        dx = math.sin(rad)  
         dy = math.cos(rad)
-        px = math.cos(rad)  # Horizontal perpendicular vector
+        px = math.cos(rad)  
         py = -math.sin(rad)
 
-        # Helper to calculate relative point positions
         def get_pt(x_offset, y_offset):
             return (
                 ex + x_offset * px + y_offset * dx,
                 ey + x_offset * py + y_offset * dy
             )
 
-        # 3. Dynamically calculate the spread of the U-shape
         if self.caught_item:
-            # Claw closes when catching an item
-            spread = 8
+            spread = 8 # Claw closes
         else:
-            # Claw is open when empty
-            spread = 22
+            spread = 22 # Claw open
 
-        # 4. Define control points for the rounded U-shape
         points = [
-            get_pt(-spread, 25), # Left tip
-            get_pt(-16, 12),     # Left shoulder
-            get_pt(-8, 0),       # Left top curve
-            get_pt(0, -4),       # Top center
-            get_pt(8, 0),        # Right top curve
-            get_pt(16, 12),      # Right shoulder
-            get_pt(spread, 25)   # Right tip
+            get_pt(-spread, 25), 
+            get_pt(-16, 12),     
+            get_pt(-8, 0),       
+            get_pt(0, -4),       
+            get_pt(8, 0),        
+            get_pt(16, 12),      
+            get_pt(spread, 25)   
         ]
 
-        # Draw the U-shape outline
         pygame.draw.lines(surface, HOOK_GRAY, False, points, 5)
-        
-        # 5. Draw a small metal bearing at the connection point
         pygame.draw.circle(surface, (100, 100, 100), (int(ex), int(ey)), 4)
 
 class Item:
@@ -294,86 +226,42 @@ class Item:
 
     def draw(self, surface):
         if self.image:
-            surface.blit(
-                self.image,
-                self.image.get_rect(center=(self.x, self.y)),
-            )
+            surface.blit(self.image, self.image.get_rect(center=(self.x, self.y)))
         else:
             if self.category == "trash":
-                pygame.draw.rect(
-                    surface,
-                    self.fallback_color,
-                    (
-                        self.x - self.size // 2,
-                        self.y - self.size // 2,
-                        self.size,
-                        self.size,
-                    ),
-                )
+                pygame.draw.rect(surface, self.fallback_color, (self.x - self.size // 2, self.y - self.size // 2, self.size, self.size))
             else:
-                pygame.draw.circle(
-                    surface,
-                    self.fallback_color,
-                    (int(self.x), int(self.y)),
-                    self.size // 2,
-                )
+                pygame.draw.circle(surface, self.fallback_color, (int(self.x), int(self.y)), self.size // 2)
 
 def spawn_item(existing_items, category):
     trash_types = ["banana", "bag", "can", "waste"]
     trash_weights = [45, 30, 15, 10]
     animal_types = ["starfish", "jellyfish", "fish", "turtle"]
     animal_weights = [45, 30, 15, 10]
+    
     if category == "trash":
-        chosen_name = random.choices(
-            trash_types,
-            weights=trash_weights,
-            k=1,
-        )[0]
+        chosen_name = random.choices(trash_types, weights=trash_weights, k=1)[0]
     else:
-        chosen_name = random.choices(
-            animal_types,
-            weights=animal_weights,
-            k=1,
-        )[0]
+        chosen_name = random.choices(animal_types, weights=animal_weights, k=1)[0]
+        
     size = ITEM_CONFIG[chosen_name]["size"]
     for _ in range(50):
         rand_x = random.randint(size, WIDTH - size)
         rand_y = random.randint(200 + size, HEIGHT - size - 50)
-        if not any(
-            math.hypot(rand_x - item.x, rand_y - item.y)
-            < (size / 2 + item.size / 2 + 15)
-            for item in existing_items
-        ):
+        if not any(math.hypot(rand_x - item.x, rand_y - item.y) < (size / 2 + item.size / 2 + 15) for item in existing_items):
             return Item(chosen_name, rand_x, rand_y)
-    return Item(
-        chosen_name,
-        random.randint(50, WIDTH - 50),
-        random.randint(250, HEIGHT - 100),
-    )
+    return Item(chosen_name, random.randint(50, WIDTH - 50), random.randint(250, HEIGHT - 100))
 
-# ================= Tutorial icon rendering helper =================
 def draw_tutorial_icon(surface, item_name, center):
     cfg = ITEM_CONFIG[item_name]
     size = cfg["size"]
     img_path = os.path.join(BASE_DIR, cfg["img"])
     if os.path.exists(img_path):
-        img = pygame.transform.scale(
-            pygame.image.load(img_path).convert_alpha(),
-            (size, size),
-        )
+        img = pygame.transform.scale(pygame.image.load(img_path).convert_alpha(), (size, size))
         surface.blit(img, img.get_rect(center=center))
     else:
         if cfg["category"] == "trash":
-            pygame.draw.rect(
-                surface,
-                cfg["color"],
-                (
-                    center[0] - size // 2,
-                    center[1] - size // 2,
-                    size,
-                    size,
-                ),
-            )
+            pygame.draw.rect(surface, cfg["color"], (center[0] - size // 2, center[1] - size // 2, size, size))
         else:
             pygame.draw.circle(surface, cfg["color"], center, size // 2)
 
@@ -389,21 +277,11 @@ async def main():
     seagrass_path = os.path.join(BASE_DIR, "resources", "seagrass.png")
     coral_path = os.path.join(BASE_DIR, "resources", "coralreef.png")
 
-    if os.path.exists(seagrass_path):
-        seagrass_img = pygame.transform.scale(
-            pygame.image.load(seagrass_path).convert_alpha(),
-            (60, 60),
-        )
-    else:
-        seagrass_img = None
+    if os.path.exists(seagrass_path): seagrass_img = pygame.transform.scale(pygame.image.load(seagrass_path).convert_alpha(), (60, 60))
+    else: seagrass_img = None
 
-    if os.path.exists(coral_path):
-        coral_img = pygame.transform.scale(
-            pygame.image.load(coral_path).convert_alpha(),
-            (60, 60),
-        )
-    else:
-        coral_img = None
+    if os.path.exists(coral_path): coral_img = pygame.transform.scale(pygame.image.load(coral_path).convert_alpha(), (60, 60))
+    else: coral_img = None
 
     if seagrass_img: seagrass_img.set_alpha(150)
     if coral_img: coral_img.set_alpha(150)
@@ -430,33 +308,23 @@ async def main():
     for _ in range(5):
         new_x = get_non_overlapping_x(60)
         existing_dec_xs.append(new_x)
-        decorations.append(
-            {
-                "type": "seagrass",
-                "img": seagrass_img,
-                "x": new_x,
-            }
-        )
+        decorations.append({"type": "seagrass", "img": seagrass_img, "x": new_x})
 
-    for _ in range(7):
-        items.append(spawn_item(items, "trash"))
-    for _ in range(5):
-        items.append(spawn_item(items, "animal"))
+    for _ in range(7): items.append(spawn_item(items, "trash"))
+    for _ in range(5): items.append(spawn_item(items, "animal"))
 
     score = 0
     trash_caught_count = 0
     animal_caught_count = 0
-    animals_saved_count = 0 # NEW: Track total animals successfully released
+    animals_saved_count = 0 
     
     time_limit = 60
     warning_frames = 0
     
     game_state = "START_MENU" 
+    tutorial_page = 1 # NEW: Tracks which page of the tutorial we are on
     countdown_start_ticks = 0
     start_ticks = 0
-    
-    start_button_rect = pygame.Rect(WIDTH//2 - 120, HEIGHT//2 + 120, 240, 60)
-    replay_button_rect = pygame.Rect(WIDTH//2 - 100, 500, 200, 50)
     
     bgm_started = False
     end_sound_played = False
@@ -465,26 +333,32 @@ async def main():
 
     while running:
         current_ticks = pygame.time.get_ticks()
-        mouse_pos = pygame.mouse.get_pos()
         
         for event in pygame.event.get():
             if event.type == pygame.QUIT: running = False
             
             # =========== Core Keyboard Controls ===========
             if event.type == pygame.KEYDOWN:
-                # SPACE key is now only used for menu transitions
-                if event.key == pygame.K_SPACE:
+                
+                # Use ONLY the DOWN arrow to progress through menus and start game
+                if event.key == pygame.K_DOWN:
                     if game_state == "START_MENU":
-                        game_state = "COUNTDOWN"
-                        countdown_start_ticks = pygame.time.get_ticks()
+                        if tutorial_page == 1:
+                            tutorial_page = 2
+                            play_sound(snd_catch) # Little sound for flipping page
+                        elif tutorial_page == 2:
+                            game_state = "COUNTDOWN"
+                            countdown_start_ticks = pygame.time.get_ticks()
+                            play_sound(snd_catch)
+                            
                     elif game_state == "GAMEOVER":
                         score = 0
                         trash_caught_count = 0
                         animal_caught_count = 0
-                        animals_saved_count = 0 # Reset saved count
+                        animals_saved_count = 0 
                         warning_frames = 0
-                        game_state = "COUNTDOWN"
-                        countdown_start_ticks = pygame.time.get_ticks()
+                        game_state = "START_MENU" # Go back to page 1 to remind the kids
+                        tutorial_page = 1
                         bgm_started = False
                         end_sound_played = False
                         pygame.mixer.stop()
@@ -492,75 +366,31 @@ async def main():
                         items = []
                         floating_texts = []
                         released_animals = [] 
-                        for _ in range(7):
-                            items.append(spawn_item(items, "trash"))
-                        for _ in range(5):
-                            items.append(spawn_item(items, "animal"))
+                        for _ in range(7): items.append(spawn_item(items, "trash"))
+                        for _ in range(5): items.append(spawn_item(items, "animal"))
 
-                # In-game controls: DOWN (catch) and UP (release)
-                if game_state == "PLAYING":
-                    # Press DOWN to launch hook
-                    if event.key == pygame.K_DOWN and hook.state == "swinging":
+                    elif game_state == "PLAYING" and hook.state == "swinging":
                         hook.state = "shooting"
-                    
-                    # Press UP to release an animal (only while retracting)
-                    elif event.key == pygame.K_UP and hook.state == "retracting" and hook.caught_item:
+                
+                # Press UP to release an animal
+                elif event.key == pygame.K_UP and game_state == "PLAYING":
+                    if hook.state == "retracting" and hook.caught_item:
                         if hook.caught_item.category == "animal":
-                            # Execute release logic
                             released_item = hook.caught_item
                             hook.caught_item = None
-                            released_animals.append(released_item) # Add to falling list
-                            animals_saved_count += 1 # Increment permanent saved stat
+                            released_animals.append(released_item) 
+                            animals_saved_count += 1 
                             
-                            play_sound(snd_success) # Play positive feedback sound
+                            play_sound(snd_success) 
                             floating_texts.append(
-                                FloatingText(
-                                    hook.x,
-                                    hook.y + 30,
-                                    "Saved!",      # Green 'Saved!' text prompt
-                                    SCORE_GREEN,
-                                )
+                                FloatingText(hook.x, hook.y + 30, "Saved!", SCORE_GREEN)
                             )
-                            # Spawn a new item to maintain density
                             items.append(spawn_item(items, random.choice(["trash", "animal"])))
             # ==========================================
 
-            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                if (
-                    game_state == "START_MENU"
-                    and start_button_rect.collidepoint(event.pos)
-                ):
-                    game_state = "COUNTDOWN"
-                    countdown_start_ticks = pygame.time.get_ticks()
-                elif (
-                    game_state == "GAMEOVER"
-                    and replay_button_rect.collidepoint(event.pos)
-                ):
-                    score = 0
-                    trash_caught_count = 0
-                    animal_caught_count = 0
-                    animals_saved_count = 0 # Reset saved count
-                    warning_frames = 0
-                    game_state = "COUNTDOWN"
-                    countdown_start_ticks = pygame.time.get_ticks()
-                    bgm_started = False
-                    end_sound_played = False
-                    pygame.mixer.stop()
-                    hook = Hook()
-                    items = []
-                    floating_texts = []
-                    released_animals = [] 
-                    for _ in range(7):
-                        items.append(spawn_item(items, "trash"))
-                    for _ in range(5):
-                        items.append(spawn_item(items, "animal"))
-
         # ============== Logic updates ==============
-        if game_state == "START_MENU":
+        if game_state in ["START_MENU", "COUNTDOWN"]:
             for b in bubbles: b.update()
-            
-        elif game_state == "COUNTDOWN":
-            for b in bubbles: b.update() 
 
         elif game_state == "PLAYING":
             if not bgm_started:
@@ -586,29 +416,15 @@ async def main():
                     text_color = SCORE_RED
                     warning_frames = 15
 
-                floating_texts.append(
-                    FloatingText(
-                        hook.x,
-                        hook.y + 30,
-                        text_str,
-                        text_color,
-                    )
-                )
+                floating_texts.append(FloatingText(hook.x, hook.y + 30, text_str, text_color))
                 items.remove(returned_item)
                 hook.caught_item = None
-                items.append(
-                    spawn_item(
-                        items,
-                        random.choice(["trash", "animal"]),
-                    )
-                )
+                items.append(spawn_item(items, random.choice(["trash", "animal"])))
+                
             if hook.state == "shooting":
                 hx, hy = hook.get_end_pos()
                 for item in items:
-                    if (
-                        math.hypot(hx - item.x, hy - item.y)
-                        < (item.size // 2 + 10)
-                    ):
+                    if math.hypot(hx - item.x, hy - item.y) < (item.size // 2 + 10):
                         hook.state = "retracting"
                         hook.caught_item = item
                         play_sound(snd_catch)
@@ -628,12 +444,7 @@ async def main():
                 game_state = "GAMEOVER"
 
         # ============== Rendering ==============
-        
-        current_bg_color = (
-            get_dynamic_bg_color(score)
-            if game_state != "START_MENU"
-            else COLOR_START
-        )
+        current_bg_color = get_dynamic_bg_color(score) if game_state != "START_MENU" else COLOR_START
         screen.fill(current_bg_color)
         
         if warning_frames > 0:
@@ -645,28 +456,12 @@ async def main():
 
         for dec in decorations:
             if dec["img"]:
-                screen.blit(
-                    dec["img"],
-                    dec["img"].get_rect(midbottom=(dec["x"], HEIGHT)),
-                )
+                screen.blit(dec["img"], dec["img"].get_rect(midbottom=(dec["x"], HEIGHT)))
             else:
                 if dec["type"] == "coral":
-                    pygame.draw.circle(
-                        screen,
-                        (100, 50, 50),
-                        (dec["x"], HEIGHT),
-                        30,
-                    )
+                    pygame.draw.circle(screen, (100, 50, 50), (dec["x"], HEIGHT), 30)
                 else:
-                    pygame.draw.polygon(
-                        screen,
-                        (0, 150, 50),
-                        [
-                            (dec["x"], HEIGHT - 60),
-                            (dec["x"] - 15, HEIGHT),
-                            (dec["x"] + 15, HEIGHT),
-                        ],
-                    )
+                    pygame.draw.polygon(screen, (0, 150, 50), [(dec["x"], HEIGHT - 60), (dec["x"] - 15, HEIGHT), (dec["x"] + 15, HEIGHT)])
         
         for b in bubbles: b.draw(screen)
         
@@ -674,137 +469,70 @@ async def main():
             for item in items: item.draw(screen)
             hook.draw(screen)
             
-            # --- Draw released animals sinking back to the ocean ---
             for ra in released_animals[:]:
-                ra.y += 6  # Sinking speed
+                ra.y += 6  
                 ra.draw(screen)
-                # Remove after falling off screen
                 if ra.y > HEIGHT + 50:
                     released_animals.remove(ra)
-            # --------------------------------
 
             for f in floating_texts: f.draw(screen)
             
-            time_left = (
-                max(0, time_limit - (current_ticks - start_ticks) // 1000)
-                if game_state == "PLAYING"
-                else 0
-            )
-            screen.blit(
-                font.render(f"Score: {score}", True, WHITE),
-                (20, 20),
-            )
-            screen.blit(
-                font.render(f"Time: {time_left}s", True, WHITE),
-                (WIDTH - 120, 20),
-            )
+            time_left = max(0, time_limit - (current_ticks - start_ticks) // 1000) if game_state == "PLAYING" else 0
+            screen.blit(font.render(f"Score: {score}", True, WHITE), (20, 20))
+            screen.blit(font.render(f"Time: {time_left}s", True, WHITE), (WIDTH - 120, 20))
 
         # ============== UI overlay rendering ==============
         if game_state == "START_MENU":
-            title_surf = title_font.render(
-                "OCEAN RESCUE",
-                True,
-                WHITE,
-            )
-            screen.blit(
-                title_surf,
-                title_surf.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 160)),
-            )
             
-            tut_heading = tutorial_font.render(
-                "HOW TO PLAY",
-                True,
-                (220, 220, 220),
-            )
-            screen.blit(
-                tut_heading,
-                tut_heading.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 90)),
-            )
+            # --- PAGE 1: The Story & Hook ---
+            if tutorial_page == 1:
+                title_surf = title_font.render("OCEAN RESCUE", True, WHITE)
+                screen.blit(title_surf, title_surf.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 120)))
+                
+                sig_text = tutorial_font.render("Made by Deli Chen", True, SCORE_BLUE)
+                screen.blit(sig_text, sig_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 60)))
+                
+                q_text = stat_font.render("Can YOU save the ocean?", True, (255, 220, 100))
+                screen.blit(q_text, q_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 20)))
+                
+                msg_text1 = info_font.render("Oh no! The sea is full of plastic garbage...", True, WHITE)
+                screen.blit(msg_text1, msg_text1.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 80)))
+                
+                msg_text2 = info_font.render("The sea animals need a hero to clean their home!", True, WHITE)
+                screen.blit(msg_text2, msg_text2.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 115)))
 
-            bag_x = WIDTH // 2 - 160
-            bag_y = HEIGHT // 2 - 40
-            icon_size = ITEM_CONFIG["bag"]["size"]
-            rule_width = 380
-            rule_height = icon_size
+                hint_text = float_font.render("Press DOWN Arrow to continue", True, SCORE_GREEN)
+                
+                # Make the prompt flash slightly to attract kids' attention
+                if (current_ticks // 500) % 2 == 0:
+                    screen.blit(hint_text, hint_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 200)))
 
-            draw_tutorial_icon(
-                screen,
-                "bag",
-                (bag_x, bag_y),
-            )
-            
-            trash_rule = small_info_font.render(
-                "Press DOWN to catch trash (+ Points)",
-                True,
-                SCORE_GREEN,
-            )
-            trash_rule_box = pygame.Surface((rule_width, rule_height), pygame.SRCALPHA)
-            trash_rule_box.blit(
-                trash_rule,
-                trash_rule.get_rect(midleft=(4, rule_height // 2)),
-            )
-            screen.blit(
-                trash_rule_box,
-                (bag_x + icon_size // 2 + 10, bag_y - rule_height // 2),
-            )
+            # --- PAGE 2: How to Play ---
+            elif tutorial_page == 2:
+                tut_heading = title_font.render("HOW TO PLAY", True, WHITE)
+                screen.blit(tut_heading, tut_heading.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 140)))
 
-            fish_x = bag_x
-            fish_y = bag_y + icon_size + 20
-            draw_tutorial_icon(
-                screen,
-                "fish",
-                (fish_x, fish_y),
-            )
-            
-            fish_rule = small_info_font.render(
-                "Press UP to release animals! (Avoid penalty)",
-                True,
-                SCORE_RED,
-            )
-            fish_rule_box = pygame.Surface((rule_width, rule_height), pygame.SRCALPHA)
-            fish_rule_box.blit(
-                fish_rule,
-                fish_rule.get_rect(midleft=(4, rule_height // 2)),
-            )
-            screen.blit(
-                fish_rule_box,
-                (fish_x + icon_size // 2 + 10, fish_y - rule_height // 2),
-            )
+                bag_x = WIDTH // 2 - 200
+                bag_y = HEIGHT // 2 - 40
+                
+                draw_tutorial_icon(screen, "bag", (bag_x, bag_y))
+                trash_rule1 = font.render("Press DOWN to catch TRASH!", True, SCORE_GREEN)
+                trash_rule2 = font.render("(+ Points)", True, SCORE_GREEN)
+                screen.blit(trash_rule1, (bag_x + 40, bag_y - 20))
+                screen.blit(trash_rule2, (bag_x + 40, bag_y + 10))
 
-            hint_text = info_font.render(
-                "Use SPACE or click START when ready",
-                True,
-                WHITE,
-            )
-            screen.blit(
-                hint_text,
-                hint_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 100)),
-            )
+                fish_x = bag_x
+                fish_y = bag_y + 90
+                
+                draw_tutorial_icon(screen, "fish", (fish_x, fish_y))
+                fish_rule1 = font.render("Oops! Caught an animal?", True, SCORE_RED)
+                fish_rule2 = font.render("Quickly press UP to SAVE it!", True, SCORE_BLUE)
+                screen.blit(fish_rule1, (fish_x + 40, fish_y - 20))
+                screen.blit(fish_rule2, (fish_x + 40, fish_y + 10))
 
-            color = (
-                BTN_HOVER
-                if start_button_rect.collidepoint(mouse_pos)
-                else BTN_COLOR
-            )
-            pygame.draw.rect(
-                screen,
-                color,
-                start_button_rect,
-                border_radius=10,
-            )
-            btn_text = float_font.render(
-                "START GAME",
-                True,
-                WHITE,
-            )
-            screen.blit(
-                btn_text,
-                btn_text.get_rect(center=start_button_rect.center),
-            )
-            
-            # Custom signature in the top-right corner
-            sig_text = info_font.render("Made by Deli Chen", True, WHITE)
-            screen.blit(sig_text, (WIDTH - sig_text.get_width() - 20, 20))
+                hint_text = float_font.render("Press DOWN Arrow to START!", True, SCORE_GREEN)
+                if (current_ticks // 500) % 2 == 0:
+                    screen.blit(hint_text, hint_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 180)))
 
         elif game_state == "COUNTDOWN":
             elapsed_sec = (current_ticks - countdown_start_ticks) / 1000.0
@@ -816,15 +544,8 @@ async def main():
             
             if elapsed_sec < 5:
                 countdown_num = str(5 - int(elapsed_sec)) 
-                text_surf = huge_font.render(
-                    countdown_num,
-                    True,
-                    WHITE,
-                )
-                screen.blit(
-                    text_surf,
-                    text_surf.get_rect(center=(WIDTH // 2, HEIGHT // 2)),
-                )
+                text_surf = huge_font.render(countdown_num, True, WHITE)
+                screen.blit(text_surf, text_surf.get_rect(center=(WIDTH // 2, HEIGHT // 2)))
             else:
                 game_state = "PLAYING"
                 start_ticks = pygame.time.get_ticks() 
@@ -842,116 +563,27 @@ async def main():
             
             center_x = WIDTH // 2
             
-            # Render Game Over stats with the new Animals Saved stat
             title_surf = title_font.render("TIME'S UP!", True, WHITE)
-            trash_surf = stat_font.render(
-                f"Trash Cleaned: {trash_caught_count}",
-                True,
-                SCORE_GREEN,
-            )
-            saved_surf = stat_font.render(
-                f"Animals Saved: {animals_saved_count}",
-                True,
-                SCORE_BLUE,
-            )
-            animal_surf = stat_font.render(
-                f"Animals Harmed: {animal_caught_count}",
-                True,
-                SCORE_RED,
-            )
-            score_surf = float_font.render(
-                f"Final Score: {score}",
-                True,
-                WHITE,
-            )
+            trash_surf = stat_font.render(f"Trash Cleaned: {trash_caught_count}", True, SCORE_GREEN)
+            saved_surf = stat_font.render(f"Animals Saved: {animals_saved_count}", True, SCORE_BLUE)
+            animal_surf = stat_font.render(f"Animals Harmed: {animal_caught_count}", True, SCORE_RED)
+            score_surf = float_font.render(f"Final Score: {score}", True, WHITE)
             
-            # Adjusted vertical spacing to accommodate the new stat
-            screen.blit(
-                title_surf,
-                title_surf.get_rect(center=(center_x, 70)),
-            )
-            screen.blit(
-                trash_surf,
-                trash_surf.get_rect(center=(center_x, 140)),
-            )
-            screen.blit(
-                saved_surf,
-                saved_surf.get_rect(center=(center_x, 185)),
-            )
-            screen.blit(
-                animal_surf,
-                animal_surf.get_rect(center=(center_x, 230)),
-            )
-            screen.blit(
-                score_surf,
-                score_surf.get_rect(center=(center_x, 300)),
-            )
+            screen.blit(title_surf, title_surf.get_rect(center=(center_x, 70)))
+            screen.blit(trash_surf, trash_surf.get_rect(center=(center_x, 150)))
+            screen.blit(saved_surf, saved_surf.get_rect(center=(center_x, 200)))
+            screen.blit(animal_surf, animal_surf.get_rect(center=(center_x, 250)))
+            screen.blit(score_surf, score_surf.get_rect(center=(center_x, 320)))
 
-            msg1 = info_font.render(
-                (
-                    "Our oceans are drowning in plastic while marine life "
-                    "is relentlessly exploited."
-                ),
-                True,
-                (200, 200, 200),
-            )
-            msg2 = info_font.render(
-                (
-                    "Every choice has a consequence. Clean the water, "
-                    "protect the life."
-                ),
-                True,
-                (200, 200, 200),
-            )
-            screen.blit(
-                msg1,
-                msg1.get_rect(center=(center_x, 370)),
-            )
-            screen.blit(
-                msg2,
-                msg2.get_rect(center=(center_x, 400)),
-            )
+            # Kid-friendly wrap-up message
+            msg1 = font.render("Every piece of trash you pick up", True, (200, 200, 200))
+            msg2 = font.render("makes the ocean a happier place!", True, (200, 200, 200))
+            screen.blit(msg1, msg1.get_rect(center=(center_x, 400)))
+            screen.blit(msg2, msg2.get_rect(center=(center_x, 430)))
 
-            insp_text = info_font.render(
-                "Inspiration: Classic 'Gold Miner'",
-                True,
-                (150, 150, 150),
-            )
-            screen.blit(
-                insp_text,
-                insp_text.get_rect(center=(center_x, 440)),
-            )
-
-            replay_color = (
-                BTN_HOVER
-                if replay_button_rect.collidepoint(mouse_pos)
-                else BTN_COLOR
-            )
-            pygame.draw.rect(
-                screen,
-                replay_color,
-                replay_button_rect,
-                border_radius=10,
-            )
-            replay_text = float_font.render(
-                "REPLAY",
-                True,
-                WHITE,
-            )
-            screen.blit(
-                replay_text,
-                replay_text.get_rect(center=replay_button_rect.center),
-            )
-
-            replay_hint = info_font.render(
-                "Or press SPACE to replay",
-                True,
-                (150, 150, 150),
-            )
-            screen.blit(
-                replay_hint,
-                replay_hint.get_rect(center=(center_x, 565)),
-            )
+            replay_hint = float_font.render("Press DOWN Arrow to Play Again!", True, SCORE_GREEN)
+            if (current_ticks // 500) % 2 == 0:
+                screen.blit(replay_hint, replay_hint.get_rect(center=(center_x, 520)))
 
         pygame.display.flip()
         clock.tick(60)
