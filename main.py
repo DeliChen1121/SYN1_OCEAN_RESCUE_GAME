@@ -334,13 +334,14 @@ def draw_tutorial_icon(surface, item_name, center):
             )
         else:
             pygame.draw.circle(surface, cfg["color"], center, size // 2)
-
+            
 # ================= Main loop =================
 async def main():
     hook = Hook()
     items = []
     floating_texts = []
     bubbles = [Bubble() for _ in range(25)] 
+    released_animals = []  # <--- 新增：专门用来装被成功放生的动物
     
     decorations = []
     seagrass_path = os.path.join(BASE_DIR, "resources", "seagrass.png")
@@ -411,7 +412,6 @@ async def main():
     countdown_start_ticks = 0
     start_ticks = 0
     
-    # Button collision rect definitions
     start_button_rect = pygame.Rect(WIDTH//2 - 120, HEIGHT//2 + 120, 240, 60)
     replay_button_rect = pygame.Rect(WIDTH//2 - 100, 480, 200, 50)
     
@@ -428,34 +428,60 @@ async def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT: running = False
             
-            # Keyboard controls
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-                if game_state == "START_MENU":
-                    game_state = "COUNTDOWN"
-                    countdown_start_ticks = pygame.time.get_ticks()
-                elif game_state == "PLAYING" and hook.state == "swinging":
-                    hook.state = "shooting"
-                elif game_state == "GAMEOVER":
-                    # Space key triggers replay logic
-                    score = 0
-                    trash_caught_count = 0
-                    animal_caught_count = 0
-                    warning_frames = 0
-                    game_state = "COUNTDOWN"
-                    countdown_start_ticks = pygame.time.get_ticks()
-                    countdown_sound_played = False
-                    bgm_started = False
-                    end_sound_played = False
-                    pygame.mixer.stop()
-                    hook = Hook()
-                    items = []
-                    floating_texts = []
-                    for _ in range(7):
-                        items.append(spawn_item(items, "trash"))
-                    for _ in range(5):
-                        items.append(spawn_item(items, "animal"))
+            # =========== 核心按键控制修改区 ===========
+            if event.type == pygame.KEYDOWN:
+                # SPACE 键现在只用来控制菜单界面的跳转
+                if event.key == pygame.K_SPACE:
+                    if game_state == "START_MENU":
+                        game_state = "COUNTDOWN"
+                        countdown_start_ticks = pygame.time.get_ticks()
+                    elif game_state == "GAMEOVER":
+                        score = 0
+                        trash_caught_count = 0
+                        animal_caught_count = 0
+                        warning_frames = 0
+                        game_state = "COUNTDOWN"
+                        countdown_start_ticks = pygame.time.get_ticks()
+                        countdown_sound_played = False
+                        bgm_started = False
+                        end_sound_played = False
+                        pygame.mixer.stop()
+                        hook = Hook()
+                        items = []
+                        floating_texts = []
+                        released_animals = [] # 重置放生列表
+                        for _ in range(7):
+                            items.append(spawn_item(items, "trash"))
+                        for _ in range(5):
+                            items.append(spawn_item(items, "animal"))
+
+                # 游戏进行中的按键：下(抓取) 和 上(放生)
+                if game_state == "PLAYING":
+                    # 按 DOWN 键抓取
+                    if event.key == pygame.K_DOWN and hook.state == "swinging":
+                        hook.state = "shooting"
                     
-            # Mouse click controls
+                    # 按 UP 键放生（前提是正在收回，且抓到了动物）
+                    elif event.key == pygame.K_UP and hook.state == "retracting" and hook.caught_item:
+                        if hook.caught_item.category == "animal":
+                            # 执行放生逻辑
+                            released_item = hook.caught_item
+                            hook.caught_item = None
+                            released_animals.append(released_item) # 放入掉落列表
+                            
+                            play_sound(snd_success) # 播放正面反馈音效
+                            floating_texts.append(
+                                FloatingText(
+                                    hook.x,
+                                    hook.y + 30,
+                                    "Saved!",      # 绿色的 Saved! 提示
+                                    SCORE_GREEN,
+                                )
+                            )
+                            # 在海里重新生成一个物品保持密度
+                            items.append(spawn_item(items, random.choice(["trash", "animal"])))
+            # ==========================================
+
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 if (
                     game_state == "START_MENU"
@@ -467,7 +493,6 @@ async def main():
                     game_state == "GAMEOVER"
                     and replay_button_rect.collidepoint(event.pos)
                 ):
-                    # Mouse click triggers replay logic
                     score = 0
                     trash_caught_count = 0
                     animal_caught_count = 0
@@ -481,6 +506,7 @@ async def main():
                     hook = Hook()
                     items = []
                     floating_texts = []
+                    released_animals = [] # 重置放生列表
                     for _ in range(7):
                         items.append(spawn_item(items, "trash"))
                     for _ in range(5):
@@ -607,6 +633,16 @@ async def main():
         if game_state in ["PLAYING", "GAMEOVER"]:
             for item in items: item.draw(screen)
             hook.draw(screen)
+            
+            # --- 新增：渲染掉回深海里的动物 ---
+            for ra in released_animals[:]:
+                ra.y += 6  # 往下掉落的速度
+                ra.draw(screen)
+                # 掉出屏幕后移除
+                if ra.y > HEIGHT + 50:
+                    released_animals.remove(ra)
+            # --------------------------------
+
             for f in floating_texts: f.draw(screen)
             
             time_left = (
@@ -624,10 +660,7 @@ async def main():
             )
 
         # ============== UI overlay rendering ==============
-        
-        # 0. Start menu state layer
         if game_state == "START_MENU":
-            # Moved the title up slightly to make room for the tutorial
             title_surf = title_font.render(
                 "OCEAN RESCUE",
                 True,
@@ -638,7 +671,6 @@ async def main():
                 title_surf.get_rect(center=(WIDTH // 2, HEIGHT // 2 - 160)),
             )
             
-            # --- TUTORIAL SECTION (Updated to use available resources) ---
             tut_heading = tutorial_font.render(
                 "HOW TO PLAY",
                 True,
@@ -660,8 +692,9 @@ async def main():
                 "bag",
                 (bag_x, bag_y),
             )
+            # 修改了这里的文案，提示使用 DOWN 键
             trash_rule = small_info_font.render(
-                "Catch trash to clean the ocean (+ Points)",
+                "Press DOWN to catch trash (+ Points)",
                 True,
                 SCORE_GREEN,
             )
@@ -682,8 +715,9 @@ async def main():
                 "fish",
                 (fish_x, fish_y),
             )
+            # 修改了这里的文案，提示使用 UP 键
             fish_rule = small_info_font.render(
-                "Avoid animals to stay safe (- Points)",
+                "Press UP to release animals! (Avoid penalty)",
                 True,
                 SCORE_RED,
             )
@@ -707,7 +741,6 @@ async def main():
                 hint_text.get_rect(center=(WIDTH // 2, HEIGHT // 2 + 100)),
             )
 
-            # Start Button
             color = (
                 BTN_HOVER
                 if start_button_rect.collidepoint(mouse_pos)
@@ -729,11 +762,9 @@ async def main():
                 btn_text.get_rect(center=start_button_rect.center),
             )
             
-            # Move custom signature to the top-right corner
             sig_text = info_font.render("Made by Deli Chen", True, WHITE)
             screen.blit(sig_text, (WIDTH - sig_text.get_width() - 20, 20))
 
-        # 1. Countdown state layer
         elif game_state == "COUNTDOWN":
             elapsed_sec = (current_ticks - countdown_start_ticks) / 1000.0
             
@@ -757,7 +788,6 @@ async def main():
                 game_state = "PLAYING"
                 start_ticks = pygame.time.get_ticks() 
 
-        # 2. Game over state layer
         elif game_state == "GAMEOVER":
             if not end_sound_played:
                 pygame.mixer.music.stop() 
@@ -788,7 +818,6 @@ async def main():
                 WHITE,
             )
             
-            # Adjusted Y-axis coordinates to make room for replay button
             screen.blit(
                 title_surf,
                 title_surf.get_rect(center=(center_x, 80)),
@@ -841,7 +870,6 @@ async def main():
                 insp_text.get_rect(center=(center_x, 430)),
             )
 
-            # New: replay button rendering
             replay_color = (
                 BTN_HOVER
                 if replay_button_rect.collidepoint(mouse_pos)

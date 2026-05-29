@@ -29,6 +29,7 @@ If you wish to view the source code or run the Python script locally on your mac
 2. Install the Pygame library:
    ```bash
    pip install pygame
+3. Open main.py file and click "Run" Button to run the game!
 
 ## 🧑‍💻 Developer
 * **Made by:** Deli Chen
