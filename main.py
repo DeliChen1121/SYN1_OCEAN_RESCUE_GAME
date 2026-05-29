@@ -24,6 +24,7 @@ HOOK_GRAY = (180, 180, 180)
 WHITE = (255, 255, 255)
 WARNING_RED = (200, 0, 0)
 SCORE_GREEN = (50, 220, 50) 
+SCORE_BLUE = (100, 200, 255) # New color for saved animals
 SCORE_RED = (255, 50, 50)   
 BTN_COLOR = (40, 120, 180)
 BTN_HOVER = (60, 150, 220)
@@ -382,7 +383,7 @@ async def main():
     items = []
     floating_texts = []
     bubbles = [Bubble() for _ in range(25)] 
-    released_animals = []  # List to track successfully released animals
+    released_animals = []  # List to track successfully released animals falling
     
     decorations = []
     seagrass_path = os.path.join(BASE_DIR, "resources", "seagrass.png")
@@ -445,6 +446,7 @@ async def main():
     score = 0
     trash_caught_count = 0
     animal_caught_count = 0
+    animals_saved_count = 0 # NEW: Track total animals successfully released
     
     time_limit = 60
     warning_frames = 0
@@ -454,7 +456,7 @@ async def main():
     start_ticks = 0
     
     start_button_rect = pygame.Rect(WIDTH//2 - 120, HEIGHT//2 + 120, 240, 60)
-    replay_button_rect = pygame.Rect(WIDTH//2 - 100, 480, 200, 50)
+    replay_button_rect = pygame.Rect(WIDTH//2 - 100, 500, 200, 50)
     
     bgm_started = False
     end_sound_played = False
@@ -479,6 +481,7 @@ async def main():
                         score = 0
                         trash_caught_count = 0
                         animal_caught_count = 0
+                        animals_saved_count = 0 # Reset saved count
                         warning_frames = 0
                         game_state = "COUNTDOWN"
                         countdown_start_ticks = pygame.time.get_ticks()
@@ -488,7 +491,7 @@ async def main():
                         hook = Hook()
                         items = []
                         floating_texts = []
-                        released_animals = [] # Reset released animals list
+                        released_animals = [] 
                         for _ in range(7):
                             items.append(spawn_item(items, "trash"))
                         for _ in range(5):
@@ -507,6 +510,7 @@ async def main():
                             released_item = hook.caught_item
                             hook.caught_item = None
                             released_animals.append(released_item) # Add to falling list
+                            animals_saved_count += 1 # Increment permanent saved stat
                             
                             play_sound(snd_success) # Play positive feedback sound
                             floating_texts.append(
@@ -535,6 +539,7 @@ async def main():
                     score = 0
                     trash_caught_count = 0
                     animal_caught_count = 0
+                    animals_saved_count = 0 # Reset saved count
                     warning_frames = 0
                     game_state = "COUNTDOWN"
                     countdown_start_ticks = pygame.time.get_ticks()
@@ -544,7 +549,7 @@ async def main():
                     hook = Hook()
                     items = []
                     floating_texts = []
-                    released_animals = [] # Reset released animals list
+                    released_animals = [] 
                     for _ in range(7):
                         items.append(spawn_item(items, "trash"))
                     for _ in range(5):
@@ -837,11 +842,17 @@ async def main():
             
             center_x = WIDTH // 2
             
+            # Render Game Over stats with the new Animals Saved stat
             title_surf = title_font.render("TIME'S UP!", True, WHITE)
             trash_surf = stat_font.render(
                 f"Trash Cleaned: {trash_caught_count}",
                 True,
                 SCORE_GREEN,
+            )
+            saved_surf = stat_font.render(
+                f"Animals Saved: {animals_saved_count}",
+                True,
+                SCORE_BLUE,
             )
             animal_surf = stat_font.render(
                 f"Animals Harmed: {animal_caught_count}",
@@ -854,21 +865,26 @@ async def main():
                 WHITE,
             )
             
+            # Adjusted vertical spacing to accommodate the new stat
             screen.blit(
                 title_surf,
-                title_surf.get_rect(center=(center_x, 80)),
+                title_surf.get_rect(center=(center_x, 70)),
             )
             screen.blit(
                 trash_surf,
-                trash_surf.get_rect(center=(center_x, 160)),
+                trash_surf.get_rect(center=(center_x, 140)),
+            )
+            screen.blit(
+                saved_surf,
+                saved_surf.get_rect(center=(center_x, 185)),
             )
             screen.blit(
                 animal_surf,
-                animal_surf.get_rect(center=(center_x, 210)),
+                animal_surf.get_rect(center=(center_x, 230)),
             )
             screen.blit(
                 score_surf,
-                score_surf.get_rect(center=(center_x, 280)),
+                score_surf.get_rect(center=(center_x, 300)),
             )
 
             msg1 = info_font.render(
@@ -889,11 +905,11 @@ async def main():
             )
             screen.blit(
                 msg1,
-                msg1.get_rect(center=(center_x, 360)),
+                msg1.get_rect(center=(center_x, 370)),
             )
             screen.blit(
                 msg2,
-                msg2.get_rect(center=(center_x, 390)),
+                msg2.get_rect(center=(center_x, 400)),
             )
 
             insp_text = info_font.render(
@@ -903,7 +919,7 @@ async def main():
             )
             screen.blit(
                 insp_text,
-                insp_text.get_rect(center=(center_x, 430)),
+                insp_text.get_rect(center=(center_x, 440)),
             )
 
             replay_color = (
@@ -934,7 +950,7 @@ async def main():
             )
             screen.blit(
                 replay_hint,
-                replay_hint.get_rect(center=(center_x, 550)),
+                replay_hint.get_rect(center=(center_x, 565)),
             )
 
         pygame.display.flip()
