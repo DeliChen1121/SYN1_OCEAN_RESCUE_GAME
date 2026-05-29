@@ -184,10 +184,10 @@ class Hook:
         self.x = WIDTH // 2
         self.y = 50
         self.angle = 0
-        self.angle_speed = 1
+        self.angle_speed = 1.5
         self.length = 40
         self.state = "swinging"
-        self.speed = 6
+        self.speed = 12
         self.caught_item = None
 
     def update(self):
@@ -202,7 +202,7 @@ class Hook:
                 self.state = "retracting"
         elif self.state == "retracting":
             if self.caught_item and self.caught_item.category == "animal":
-                current_speed = 2
+                current_speed = 4 
             else:
                 current_speed = self.speed
             self.length -= current_speed
@@ -211,6 +211,7 @@ class Hook:
                 self.state = "swinging"
                 return self.caught_item
         return None
+
     def get_end_pos(self):
         rad = math.radians(self.angle)
         return (
@@ -220,6 +221,8 @@ class Hook:
 
     def draw(self, surface):
         ex, ey = self.get_end_pos()
+        
+        # 1. 画绳子
         pygame.draw.line(
             surface,
             HOOK_GRAY,
@@ -227,12 +230,45 @@ class Hook:
             (ex, ey),
             3,
         )
-        pygame.draw.circle(
-            surface,
-            HOOK_GRAY,
-            (int(ex), int(ey)),
-            10,
-        )
+        
+        # 2. 绘制倒 U 型钩子 (利用三角函数实现跟随绳子完美旋转)
+        rad = math.radians(self.angle)
+        dx = math.sin(rad)  # 垂直向下延伸的向量
+        dy = math.cos(rad)
+        px = math.cos(rad)  # 水平向右的向量
+        py = -math.sin(rad)
+
+        # 辅助函数：根据绳子末端坐标，计算相对偏移点的位置
+        def get_pt(x_offset, y_offset):
+            return (
+                ex + x_offset * px + y_offset * dx,
+                ey + x_offset * py + y_offset * dy
+            )
+
+        # 3. 动态计算 U 字的两端开合度
+        if self.caught_item:
+            # 抓到东西时：U字的两端收缩闭合
+            spread = 8
+        else:
+            # 没抓东西时：U字的两端张开
+            spread = 22
+
+        # 4. 用一系列的控制点来描绘一个圆润的倒 U 型 ∩
+        points = [
+            get_pt(-spread, 25), # 左侧尖端
+            get_pt(-16, 12),     # 左侧肩膀
+            get_pt(-8, 0),       # 左侧顶部弧度
+            get_pt(0, -4),       # 顶部正中心 (稍微往上突起一点)
+            get_pt(8, 0),        # 右侧顶部弧度
+            get_pt(16, 12),      # 右侧肩膀
+            get_pt(spread, 25)   # 右侧尖端
+        ]
+
+        # 连线画出 U 形 (False表示不闭合首尾两点)
+        pygame.draw.lines(surface, HOOK_GRAY, False, points, 5)
+        
+        # 5. 在绳子和 U 形的连接处画一个深色的金属小圆轴承
+        pygame.draw.circle(surface, (100, 100, 100), (int(ex), int(ey)), 4)
 
 class Item:
     def __init__(self, item_name, x, y):
