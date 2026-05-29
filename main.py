@@ -48,8 +48,13 @@ def load_sound(filename):
 snd_catch = load_sound("click.wav")              
 snd_success = load_sound("chime.wav")            
 snd_fail = load_sound("error.wav")               
-snd_countdown = load_sound("five_sec_countdown.ogg") 
 snd_end = load_sound("end.wav")                  
+
+# Adjust volume to prevent clipping/distortion
+if snd_catch: snd_catch.set_volume(0.6)
+if snd_success: snd_success.set_volume(0.5)
+if snd_fail: snd_fail.set_volume(0.5)
+if snd_end: snd_end.set_volume(0.7)
 
 def play_sound(snd):
     if snd: snd.play()
@@ -222,7 +227,7 @@ class Hook:
     def draw(self, surface):
         ex, ey = self.get_end_pos()
         
-        # 1. 画绳子
+        # 1. Draw the rope
         pygame.draw.line(
             surface,
             HOOK_GRAY,
@@ -231,43 +236,43 @@ class Hook:
             3,
         )
         
-        # 2. 绘制倒 U 型钩子 (利用三角函数实现跟随绳子完美旋转)
+        # 2. Draw inverted U-shaped hook using trigonometry
         rad = math.radians(self.angle)
-        dx = math.sin(rad)  # 垂直向下延伸的向量
+        dx = math.sin(rad)  # Downward vector
         dy = math.cos(rad)
-        px = math.cos(rad)  # 水平向右的向量
+        px = math.cos(rad)  # Horizontal perpendicular vector
         py = -math.sin(rad)
 
-        # 辅助函数：根据绳子末端坐标，计算相对偏移点的位置
+        # Helper to calculate relative point positions
         def get_pt(x_offset, y_offset):
             return (
                 ex + x_offset * px + y_offset * dx,
                 ey + x_offset * py + y_offset * dy
             )
 
-        # 3. 动态计算 U 字的两端开合度
+        # 3. Dynamically calculate the spread of the U-shape
         if self.caught_item:
-            # 抓到东西时：U字的两端收缩闭合
+            # Claw closes when catching an item
             spread = 8
         else:
-            # 没抓东西时：U字的两端张开
+            # Claw is open when empty
             spread = 22
 
-        # 4. 用一系列的控制点来描绘一个圆润的倒 U 型 ∩
+        # 4. Define control points for the rounded U-shape
         points = [
-            get_pt(-spread, 25), # 左侧尖端
-            get_pt(-16, 12),     # 左侧肩膀
-            get_pt(-8, 0),       # 左侧顶部弧度
-            get_pt(0, -4),       # 顶部正中心 (稍微往上突起一点)
-            get_pt(8, 0),        # 右侧顶部弧度
-            get_pt(16, 12),      # 右侧肩膀
-            get_pt(spread, 25)   # 右侧尖端
+            get_pt(-spread, 25), # Left tip
+            get_pt(-16, 12),     # Left shoulder
+            get_pt(-8, 0),       # Left top curve
+            get_pt(0, -4),       # Top center
+            get_pt(8, 0),        # Right top curve
+            get_pt(16, 12),      # Right shoulder
+            get_pt(spread, 25)   # Right tip
         ]
 
-        # 连线画出 U 形 (False表示不闭合首尾两点)
+        # Draw the U-shape outline
         pygame.draw.lines(surface, HOOK_GRAY, False, points, 5)
         
-        # 5. 在绳子和 U 形的连接处画一个深色的金属小圆轴承
+        # 5. Draw a small metal bearing at the connection point
         pygame.draw.circle(surface, (100, 100, 100), (int(ex), int(ey)), 4)
 
 class Item:
@@ -370,14 +375,14 @@ def draw_tutorial_icon(surface, item_name, center):
             )
         else:
             pygame.draw.circle(surface, cfg["color"], center, size // 2)
-            
+
 # ================= Main loop =================
 async def main():
     hook = Hook()
     items = []
     floating_texts = []
     bubbles = [Bubble() for _ in range(25)] 
-    released_animals = []  # <--- 新增：专门用来装被成功放生的动物
+    released_animals = []  # List to track successfully released animals
     
     decorations = []
     seagrass_path = os.path.join(BASE_DIR, "resources", "seagrass.png")
@@ -451,7 +456,6 @@ async def main():
     start_button_rect = pygame.Rect(WIDTH//2 - 120, HEIGHT//2 + 120, 240, 60)
     replay_button_rect = pygame.Rect(WIDTH//2 - 100, 480, 200, 50)
     
-    countdown_sound_played = False
     bgm_started = False
     end_sound_played = False
     
@@ -464,9 +468,9 @@ async def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT: running = False
             
-            # =========== 核心按键控制修改区 ===========
+            # =========== Core Keyboard Controls ===========
             if event.type == pygame.KEYDOWN:
-                # SPACE 键现在只用来控制菜单界面的跳转
+                # SPACE key is now only used for menu transitions
                 if event.key == pygame.K_SPACE:
                     if game_state == "START_MENU":
                         game_state = "COUNTDOWN"
@@ -478,43 +482,42 @@ async def main():
                         warning_frames = 0
                         game_state = "COUNTDOWN"
                         countdown_start_ticks = pygame.time.get_ticks()
-                        countdown_sound_played = False
                         bgm_started = False
                         end_sound_played = False
                         pygame.mixer.stop()
                         hook = Hook()
                         items = []
                         floating_texts = []
-                        released_animals = [] # 重置放生列表
+                        released_animals = [] # Reset released animals list
                         for _ in range(7):
                             items.append(spawn_item(items, "trash"))
                         for _ in range(5):
                             items.append(spawn_item(items, "animal"))
 
-                # 游戏进行中的按键：下(抓取) 和 上(放生)
+                # In-game controls: DOWN (catch) and UP (release)
                 if game_state == "PLAYING":
-                    # 按 DOWN 键抓取
+                    # Press DOWN to launch hook
                     if event.key == pygame.K_DOWN and hook.state == "swinging":
                         hook.state = "shooting"
                     
-                    # 按 UP 键放生（前提是正在收回，且抓到了动物）
+                    # Press UP to release an animal (only while retracting)
                     elif event.key == pygame.K_UP and hook.state == "retracting" and hook.caught_item:
                         if hook.caught_item.category == "animal":
-                            # 执行放生逻辑
+                            # Execute release logic
                             released_item = hook.caught_item
                             hook.caught_item = None
-                            released_animals.append(released_item) # 放入掉落列表
+                            released_animals.append(released_item) # Add to falling list
                             
-                            play_sound(snd_success) # 播放正面反馈音效
+                            play_sound(snd_success) # Play positive feedback sound
                             floating_texts.append(
                                 FloatingText(
                                     hook.x,
                                     hook.y + 30,
-                                    "Saved!",      # 绿色的 Saved! 提示
+                                    "Saved!",      # Green 'Saved!' text prompt
                                     SCORE_GREEN,
                                 )
                             )
-                            # 在海里重新生成一个物品保持密度
+                            # Spawn a new item to maintain density
                             items.append(spawn_item(items, random.choice(["trash", "animal"])))
             # ==========================================
 
@@ -535,14 +538,13 @@ async def main():
                     warning_frames = 0
                     game_state = "COUNTDOWN"
                     countdown_start_ticks = pygame.time.get_ticks()
-                    countdown_sound_played = False
                     bgm_started = False
                     end_sound_played = False
                     pygame.mixer.stop()
                     hook = Hook()
                     items = []
                     floating_texts = []
-                    released_animals = [] # 重置放生列表
+                    released_animals = [] # Reset released animals list
                     for _ in range(7):
                         items.append(spawn_item(items, "trash"))
                     for _ in range(5):
@@ -553,9 +555,6 @@ async def main():
             for b in bubbles: b.update()
             
         elif game_state == "COUNTDOWN":
-            if not countdown_sound_played:
-                play_sound(snd_countdown)
-                countdown_sound_played = True
             for b in bubbles: b.update() 
 
         elif game_state == "PLAYING":
@@ -670,11 +669,11 @@ async def main():
             for item in items: item.draw(screen)
             hook.draw(screen)
             
-            # --- 新增：渲染掉回深海里的动物 ---
+            # --- Draw released animals sinking back to the ocean ---
             for ra in released_animals[:]:
-                ra.y += 6  # 往下掉落的速度
+                ra.y += 6  # Sinking speed
                 ra.draw(screen)
-                # 掉出屏幕后移除
+                # Remove after falling off screen
                 if ra.y > HEIGHT + 50:
                     released_animals.remove(ra)
             # --------------------------------
@@ -728,7 +727,7 @@ async def main():
                 "bag",
                 (bag_x, bag_y),
             )
-            # 修改了这里的文案，提示使用 DOWN 键
+            
             trash_rule = small_info_font.render(
                 "Press DOWN to catch trash (+ Points)",
                 True,
@@ -751,7 +750,7 @@ async def main():
                 "fish",
                 (fish_x, fish_y),
             )
-            # 修改了这里的文案，提示使用 UP 键
+            
             fish_rule = small_info_font.render(
                 "Press UP to release animals! (Avoid penalty)",
                 True,
@@ -798,6 +797,7 @@ async def main():
                 btn_text.get_rect(center=start_button_rect.center),
             )
             
+            # Custom signature in the top-right corner
             sig_text = info_font.render("Made by Deli Chen", True, WHITE)
             screen.blit(sig_text, (WIDTH - sig_text.get_width() - 20, 20))
 
