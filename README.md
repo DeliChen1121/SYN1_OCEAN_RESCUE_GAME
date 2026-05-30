@@ -9,6 +9,7 @@ This interactive artifact serves to illustrate the tangible consequences of huma
 ## 🎮 Gameplay Mechanics
 * **Positive Action (Catching Trash):** Collecting discarded items (bags, cans, bananas, toxic waste) increases your score and cleans the ocean. 
 * **Negative Consequence (Harming Wildlife):** Accidentally hooking marine life (turtles, fish, jellyfish, starfish) deducts points and triggers visual/audio alarms.
+* **Savable Action (Saving Wildlife):** If accidentally hooking a marine life, you are able to press "up button" to save it.
 * **Dynamic Environment:** The game features a real-time visual feedback loop. As your score increases, the background water color dynamically shifts from a toxic, murky brown to a vibrant, clean blue, directly reflecting the impact of your choices.
 
 ## 🚀 How to Play
@@ -47,8 +48,7 @@ This project was made possible by the following free and open-source assets:
 1. **Click (Hooked):** [Mellau - click](https://freesound.org/people/Mellau/sounds/506054/)
 2. **Chime (Score):** [Andromadax24 - chime](https://freesound.org/people/Andromadax24/sounds/186719/)
 3. **Error (Penalty):** [qubodup - error](https://freesound.org/people/qubodup/sounds/722377/)
-4. **Countdown (5-sec):** [angelTSX - 5-sec-countdown](https://freesound.org/people/angelTSX/sounds/851299/)
-5. **End (Time's Up):** [davidbain - end](https://freesound.org/people/davidbain/sounds/135831/)
+4. **End (Time's Up):** [davidbain - end](https://freesound.org/people/davidbain/sounds/135831/)
 
 ---
 *"Our oceans are drowning in plastic while marine life is relentlessly exploited. Every choice has a consequence. Clean the water, protect the life."* 
